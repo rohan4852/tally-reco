@@ -7,6 +7,10 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+BACKEND_APP_PATH = ROOT / "backend" / "app"
+if str(BACKEND_APP_PATH) not in sys.path:
+    sys.path.insert(0, str(BACKEND_APP_PATH))
+
 _LOCAL_API_THREAD_STARTED = False
 
 
