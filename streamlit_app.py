@@ -3,6 +3,7 @@ import sys
 import os
 import logging
 from threading import Thread
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -10,13 +11,12 @@ logger = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parent
 BACKEND_PATH = ROOT / "backend"
-BACKEND_APP_PATH = BACKEND_PATH / "app"
 
-# Setup Python path for imports
+# Setup Python path for imports - CRITICAL for Streamlit Cloud
+# Must add backend to path so that 'from app.x import y' works
 paths_to_add = [
-    str(ROOT),
-    str(BACKEND_PATH),
-    str(BACKEND_APP_PATH),
+    str(BACKEND_PATH),  # For 'from app.x' imports
+    str(ROOT),           # For 'from frontend.x' imports
 ]
 
 for path in paths_to_add:
@@ -44,6 +44,7 @@ def _start_local_api_if_needed() -> None:
         logger.info("uvicorn imported successfully")
         
         # Try to import the FastAPI app
+        # After adding backend to sys.path, this should work
         from app.main import app as fastapi_app
         logger.info("FastAPI app imported successfully")
         
@@ -64,6 +65,8 @@ def _start_local_api_if_needed() -> None:
         thread.start()
         _LOCAL_API_THREAD_STARTED = True
         logger.info("FastAPI backend thread started successfully")
+        # Give the API a moment to start
+        time.sleep(1)
         
     except ImportError as e:
         logger.warning(f"Could not import FastAPI backend: {e}")
