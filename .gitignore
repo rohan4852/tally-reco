@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# Node (if frontend uses it)
+node_modules/
+
+# Uploads / generated artifacts
+uploads/
+outputs/
+temp_day7/
+backend/temp_day7/
+
+# Excel / tabular outputs
+*.xlsx
+*.xls
+*.csv
+
+# Coverage / reports
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep git from deleting placeholder dirs (if any)
+!.gitkeep
+
