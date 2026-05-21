@@ -1,3 +1,18 @@
+from __future__ import annotations
+
+# ---- Import-safety for Streamlit Cloud / uvicorn ----
+# This module must be importable as `backend.app.main:app`.
+# The package `app` lives at: <repo>/backend/app, so we must ensure
+# <repo>/backend is on sys.path before importing `app.*`.
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+BACKEND_DIR = str(HERE.parent)  # <repo>/backend
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+
+# Now it is safe to import app.*
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
