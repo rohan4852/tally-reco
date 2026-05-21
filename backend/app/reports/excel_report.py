@@ -205,6 +205,7 @@ def generate_excel_report(
     ]
     ws_missing_gst.append(missing_gst_headers)
 
+
     ws_missing_books = wb.create_sheet(reconcile_response.missing_in_books_sheet_name)
     missing_books_headers = [
         "GSTIN",
