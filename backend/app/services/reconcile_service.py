@@ -163,11 +163,38 @@ def reconcile_session(session_id: str, gst_path: Path, tally_path: Path) -> Reco
         accuracy_percent=round(accuracy_percent, 2),
     )
 
-    return ReconcileResponse(
-        session_id=session_id,
-        message="Reconciliation completed (MVP Day 3).",
-        summary=summary,
-        matched_preview=matched_preview[:50],
-        mismatches_preview=mismatches[:50],
-    )
+    # Ensure missing-in-GST/Books fields never export as None.
+    # (Observed issue: tally-side values on Missing in GST sheet were coming through as None.)
+    def _coerce_str(v) -> str:
+        return "" if v is None else str(v)
+
+    def _coerce_float(v) -> float:
+        try:
+            if v is None:
+                return 0.0
+            return float(v)
+        except Exception:
+            return 0.0
+
+    for mm in mismatches:
+        # tally side
+        mm.tally_gstin = _coerce_str(mm.tally_gstin)
+        mm.tally_supplier_name = _coerce_str(mm.tally_supplier_name)
+        mm.tally_invoice_number = _coerce_str(mm.tally_invoice_number)
+        mm.tally_invoice_date = _coerce_str(mm.tally_invoice_date)
+        mm.tally_taxable_amount = _coerce_float(mm.tally_taxable_amount)
+        mm.tally_cgst = _coerce_float(mm.tally_cgst)
+        mm.tally_sgst = _coerce_float(mm.tally_sgst)
+        mm.tally_igst = _coerce_float(mm.tally_igst)
+
+        # gst side
+        mm.gst_gstin = _coerce_str(mm.gst_gstin)
+        mm.gst_supplier_name = _coerce_str(mm.gst_supplier_name)
+        mm.gst_invoice_number = _coerce_str(mm.gst_invoice_number)
+        mm.gst_invoice_date = _coerce_str(mm.gst_invoice_date)
+        mm.gst_taxable_amount = _coerce_float(mm.gst_taxable_amount)
+        mm.gst_cgst = _coerce_float(mm.gst_cgst)
+        mm.gst_sgst = _coerce_float(mm.gst_sgst)
+        mm.gst_igst = _coerce_float(mm.gst_igst)
+
 
