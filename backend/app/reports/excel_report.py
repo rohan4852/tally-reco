@@ -43,6 +43,7 @@ def _set_reasonable_widths(ws, max_width: int = 45) -> None:
 
 
 
+
 def _format_invoice_for_export(invoice_number: str) -> str:
     # Preserve the formatter expectations from CA workflow: keep hyphenated form when present.
     # If we only have digits/letters, do not alter it; normalization happened internally already.
@@ -219,9 +220,13 @@ def generate_excel_report(
 
     for mm in reconcile_response.mismatches_preview:
         if mm.mismatch_type == "Missing in GST":
-            ws_missing_gst.append(_map_missing_invoice_to_row(mm, "GST"))
+            row = _map_missing_invoice_to_row(mm, "GST")
+            if any((v is not None and str(v).strip() != "") for v in row):
+                ws_missing_gst.append(row)
         elif mm.mismatch_type == "Missing in Books":
-            ws_missing_books.append(_map_missing_invoice_to_row(mm, "Books"))
+            row = _map_missing_invoice_to_row(mm, "Books")
+            if any((v is not None and str(v).strip() != "") for v in row):
+                ws_missing_books.append(row)
 
 
 
