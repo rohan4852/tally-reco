@@ -27,7 +27,6 @@ def _init_session_state() -> None:
 def main() -> None:
     st.set_page_config(
         page_title="GST Reconciliation",
-        page_icon="✅",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
