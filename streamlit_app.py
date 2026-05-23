@@ -24,14 +24,21 @@ for path in paths_to_add:
         sys.path.insert(0, path)
         logger.info(f"Added to sys.path: {path}")
 
+
+# Module-level guard (works within a single Streamlit process).
 _LOCAL_API_THREAD_STARTED = False
 
 
 def _start_local_api_if_needed() -> None:
-    """Start the FastAPI backend in a daemon thread if API_BASE_URL is not set."""
+    """Start the FastAPI backend in a daemon thread if API_BASE_URL is not set.
+
+    Streamlit can rerun the script on interactions; however we must avoid binding
+    the same port multiple times.
+    """
     global _LOCAL_API_THREAD_STARTED
     if _LOCAL_API_THREAD_STARTED:
         return
+
 
     api_base_url = os.environ.get("API_BASE_URL")
     if api_base_url:

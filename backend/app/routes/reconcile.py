@@ -42,11 +42,24 @@ async def reconcile_files(session_id: str) -> ReconcileResponse:
     tally_path = _find_session_file(session_id, "tally")
 
     try:
-        return reconcile_session(session_id=session_id, gst_path=gst_path, tally_path=tally_path)
+        result = reconcile_session(
+            session_id=session_id,
+            gst_path=gst_path,
+            tally_path=tally_path,
+        )
+        # Never allow FastAPI to validate `None` against response_model.
+        if result is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to reconcile: reconcile_session returned None",
+            )
+        return result
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Failed to reconcile: {str(e)}")
+        # Surface traceback details via logs while keeping response user-safe.
+        raise HTTPException(status_code=500, detail=f"Failed to reconcile: {str(e)}")
+
 
 
 @router.get(
