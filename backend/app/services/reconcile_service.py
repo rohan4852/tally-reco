@@ -197,4 +197,17 @@ def reconcile_session(session_id: str, gst_path: Path, tally_path: Path) -> Reco
         mm.gst_sgst = _coerce_float(mm.gst_sgst)
         mm.gst_igst = _coerce_float(mm.gst_igst)
 
+    # ---------------------------------------------------------------------
+    # FINAL CONTRACT: NEVER RETURN None
+    # ---------------------------------------------------------------------
+    # FastAPI response_model validation requires a concrete ReconcileResponse.
+    return ReconcileResponse(
+        session_id=session_id,
+        message="Reconciliation completed successfully.",
+        summary=summary,
+        matched_preview=matched_preview or [],
+        mismatches_preview=mismatches or [],
+    )
+
+
 

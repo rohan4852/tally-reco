@@ -6,6 +6,7 @@ from app.reports.excel_report import generate_excel_report
 from app.schemas.reconcile import ReconcileResponse
 from app.services.reconcile_service import reconcile_session
 
+
 router = APIRouter(prefix="/reconcile", tags=["Reconcile"])
 
 
@@ -47,13 +48,22 @@ async def reconcile_files(session_id: str) -> ReconcileResponse:
             gst_path=gst_path,
             tally_path=tally_path,
         )
+
         # Never allow FastAPI to validate `None` against response_model.
         if result is None:
             raise HTTPException(
                 status_code=500,
                 detail="Failed to reconcile: reconcile_session returned None",
             )
+
+        # Ensure preview lists are never None (defensive).
+        if result.matched_preview is None:
+            result.matched_preview = []
+        if result.mismatches_preview is None:
+            result.mismatches_preview = []
+
         return result
+
     except HTTPException:
         raise
     except Exception as e:
@@ -80,21 +90,39 @@ async def download_reconciliation_report(session_id: str) -> "openpyxl.workbook.
             gst_path=gst_path,
             tally_path=tally_path,
         )
+
+        if reconcile_response is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate report: reconciliation returned None",
+            )
+
         filename = f"reconciliation_{session_id}.xlsx"
         out_path = generate_excel_report(
             reconcile_response=reconcile_response,
             output_dir=OUTPUT_DIR,
             filename=filename,
         )
+
+        # Validate output file exists
+        if out_path is None or not Path(out_path).exists():
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate reconciliation report: output file was not created.",
+            )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Failed to generate report: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate reconciliation report.",
+        ) from e
 
     return FileResponse(
         path=str(out_path),
         filename=out_path.name,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
 
 
